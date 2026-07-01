@@ -1,0 +1,21 @@
+[project]
+name = "pdf-note-mcp"
+version = "0.1.0"
+description = "MCP Server with pdf_extract and pdf_screenshot tools — zero AI calls, pure data extraction."
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.0.0",
+    "pdfplumber>=0.10.0",
+    "pdf2image>=1.16.0",
+    "Pillow>=10.0.0",
+]
+
+[project.scripts]
+pdf-note-mcp = "server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["server.py"]

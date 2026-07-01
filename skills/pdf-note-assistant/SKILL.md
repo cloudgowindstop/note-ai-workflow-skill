@@ -26,13 +26,14 @@ tags:
 
 ---
 
-## ⚠️ 关键规则
+## 关键规则
 
 1. **必须使用 MCP 工具处理 PDF**：提取内容用 `pdf_extract`，截图用 `pdf_screenshot`。禁止使用 `pdftotext`、`pdfinfo` 等系统命令。
 2. **智能截图**：页面包含图表、公式、表格、代码块，或 pdfplumber 提取不完整 → 必须截图。纯文字且提取完整 → 可跳过。
 3. **必须写入文件**：所有内容写入 `./notes/` 目录，不能只在对话中展示。
 4. **多 PDF 感知**：每次开始前先扫描 `./notes/README.md`，了解本课程已有的全部 PDF 笔记和文件结构。
 5. **自动维护索引**：每次写入新笔记后，更新 `./notes/README.md`。
+6. **主干与追问分离**：首次分析写入 `notes.md`（论文框架），深度追问写入 `deep_dive.md`（探索记录）。两个文件定位不同，不混合。
 
 ---
 
@@ -51,7 +52,7 @@ tags:
 
 ## 模式 A：首次分析
 
-初次阅读一篇 PDF，产出结构化笔记。
+初次阅读一篇 PDF，产出结构化主干笔记。
 
 ### A1. 确认路径 & 初始化
 - 提取 PDF 文件名，转为绝对路径
@@ -120,11 +121,15 @@ tags:
 
 ## 模式 B：深度追问
 
-对已有笔记的 PDF 提出进一步问题，按知识模块组织 Q&A。
+对已有笔记的 PDF 提出进一步问题。写入**独立的 `deep_dive.md` 文件**，与主干 `notes.md` 分离。
+
+设计意图：
+- `notes.md` = 论文"地图"，适合快速回顾框架
+- `deep_dive.md` = 个人"探索记录"，适合深入研究和备考
 
 ### B1. 读取上下文
-- `Read` 读取 `./notes/{pdf名称}/notes.md`
-- `Read` 读取 `./notes/{pdf名称}/deep_dive.md`（如存在）
+- `Read` 读取 `./notes/{pdf名称}/notes.md`（了解论文框架）
+- `Read` 读取 `./notes/{pdf名称}/deep_dive.md`（如存在，了解已有追问）
 - `Read` 读取 `./notes/README.md`
 - 全部读完后再开始回答，不要分步读
 
@@ -142,15 +147,17 @@ tags:
 | 工程实践 | 训练细节、实现方式、数据集 | 工程实现 |
 | 其他 | 不属于以上 | 补充讨论 |
 
-### B4. 写入 notes.md
-将 Q&A 追加到 `./notes/{pdf名称}/notes.md` 末尾，使用以下格式：
+### B4. 写入 deep_dive.md
+将 Q&A 写入 `./notes/{pdf名称}/deep_dive.md`：
 
 ```markdown
-## 深度追问
+# 深度追问 — {PDF文件名}
 
-### 模块：{模块名}
+---
 
-#### Q: {用户追问原文}
+## 模块：{模块名}
+
+### Q: {用户追问原文}
 
 **核心回答**
 {2-3 句直接结论}
@@ -165,10 +172,13 @@ tags:
 ```
 
 ### B5. 追加策略
-- 先读 `notes.md`，判断新问题属于已有模块还是新模块
+- 先读 `deep_dive.md`（如存在），判断新问题属于已有模块还是新模块
 - 已有模块 → 追加在该模块末尾
 - 新模块 → 创建新模块标题
 - 每次追问以 `---` 分隔
+
+### B6. 更新索引
+`deep_dive.md` 首次创建时，更新 `./notes/README.md` 索引。
 
 ---
 
@@ -183,7 +193,7 @@ tags:
 
 ### C2. 并行获取信息
 - 对每个涉及的 PDF 调用 `pdf_extract`
-- 同时 `Read` 各自的 `notes.md` 获取已有分析
+- 同时 `Read` 各自的 `notes.md` 和 `deep_dive.md`（如存在）获取已有分析
 
 ### C3. 生成对比
 对每个对比维度生成表格 + 深入分析：
@@ -222,7 +232,7 @@ tags:
 ```
 
 ### C5. 更新索引
-更新 `./notes/README.md`，确保 cross_topics.md 在索引中。
+更新 `./notes/README.md`。
 
 ---
 
@@ -236,7 +246,7 @@ tags:
 
 ### D2. 全课程搜索
 - 调用 `pdf_extract` 搜索与题目相关的 PDF 页面
-- `Read` 读取所有相关 `notes.md` 的已有分析
+- `Read` 读取所有相关 `notes.md` 和 `deep_dive.md` 的已有分析
 - 如有需要，调用 `pdf_screenshot` 截取证据
 
 ### D3. 综合回答
@@ -280,14 +290,17 @@ tags:
 ```
 ./notes/
 ├── README.md              ← 课程笔记索引（自动维护）
-├── {pdf-a}/               ← 论文 A
-│   ├── notes.md           ← 首次分析 + 追问（合并）
+├── {paper-a}/             ← 论文 A
+│   ├── notes.md           ← 主干笔记：论文框架和讲解
+│   ├── deep_dive.md       ← 深度追问：按模块组织的 Q&A
 │   └── screenshots/
-├── {pdf-b}/               ← 论文 B
+├── {paper-b}/             ← 论文 B
 │   ├── notes.md
+│   ├── deep_dive.md
 │   └── screenshots/
-├── {pdf-c}/               ← 课件/其他 PDF
+├── {lecture-x}/           ← 课件/其他 PDF
 │   ├── notes.md
+│   ├── deep_dive.md
 │   └── screenshots/
 ├── cross_topics.md        ← 跨 PDF 对比与综合讨论
 └── homework.md            ← 作业分析
@@ -306,10 +319,11 @@ tags:
 
 ## PDF 笔记
 
-| 文件 | 主题 | 页数 | 状态 |
-|------|------|------|------|
-| [论文A](./paper-a/notes.md) | {一句话主题} | N页 | 首次分析 |
-| [论文B](./paper-b/notes.md) | {一句话主题} | N页 | 首次分析 + 追问 |
+| 文件 | 主题 | 状态 |
+|------|------|------|
+| [论文A](./paper-a/notes.md) | {一句话主题} | 主干 + 追问([deep_dive](./paper-a/deep_dive.md)) |
+| [论文B](./paper-b/notes.md) | {一句话主题} | 主干 |
+| [课件X](./lecture-x/notes.md) | {一句话主题} | 主干 + 追问([deep_dive](./lecture-x/deep_dive.md)) |
 
 ## 交叉对比
 
@@ -320,7 +334,7 @@ tags:
 - [作业记录](./homework.md) — {最近作业题目}
 ```
 
-课程名从当前工作目录名推断（如 `nlp-course` → 「NLP 课程」）。
+课程名从当前工作目录名推断。
 
 ---
 
@@ -329,7 +343,8 @@ tags:
 每次工作完成后自查：
 - [ ] 使用了 MCP 工具而非系统命令（`pdftotext` 等）
 - [ ] 有图表/公式的页面已截图
-- [ ] 内容已写入正确的文件（模式 A→notes.md，C→cross_topics.md，D→homework.md）
+- [ ] 内容已写入正确的文件（A→notes.md，B→deep_dive.md，C→cross_topics.md，D→homework.md）
+- [ ] 主干 notes.md 与追问 deep_dive.md 已分离，没有混合
 - [ ] 公式使用 LaTeX 语法
 - [ ] 专业术语保留英文原文
 - [ ] `./notes/README.md` 索引已更新
